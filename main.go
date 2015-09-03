@@ -1,14 +1,18 @@
 package main
 
-import "net/http"
-
+import (
+    "fmt"
+    "net/http"
+    "os"
+)
 
 func main() {
-    println("sito")
+    fmt.Println("sito")
     http.HandleFunc("/", someFunc)
-    http.ListenAndServe(":8080", nil)
+    http.ListenAndServe(":"+os.Getenv("PORT"), nil)
 }
 
-func someFunc(w http.ResponseWriter, req *http.Request) {
-    w.Write([]byte("sito is cool"))
+func someFunc(res http.ResponseWriter, req *http.Request) {
+    fmt.Fprintln(res, "sito is cool")
+
 }

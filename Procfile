@@ -1,1 +1,1 @@
-web: sito
+web: sitoapp

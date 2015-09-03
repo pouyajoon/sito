@@ -9,7 +9,10 @@ import (
 func main() {
     fmt.Println("sito")
     http.HandleFunc("/", someFunc)
-    http.ListenAndServe(":"+os.Getenv("PORT"), nil)
+    err := http.ListenAndServe(":"+os.Getenv("PORT"), nil)
+    if err != nil {
+      panic(err)
+    }
 }
 
 func someFunc(res http.ResponseWriter, req *http.Request) {

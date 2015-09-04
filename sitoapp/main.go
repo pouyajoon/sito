@@ -2,12 +2,12 @@ package main
 
 import (
 	"fmt"
-	log "github.com/Sirupsen/logrus"
-	"github.com/codegangsta/negroni"
 	"html/template"
 	"io/ioutil"
 	"net/http"
 	"os"
+	log "sito/Godeps/_workspace/src/github.com/Sirupsen/logrus"
+	"sito/Godeps/_workspace/src/github.com/codegangsta/negroni"
 )
 
 // type Page struct {

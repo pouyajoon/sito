@@ -22,3 +22,7 @@ _testmain.go
 *.exe
 *.test
 *.prof
+
+Godeps/_workspace/*
+Godeps/workspace/*
+.DS_Store

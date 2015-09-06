@@ -1,54 +1,43 @@
 package main
 
 import (
+	// "encoding/json"
 	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"github.com/codegangsta/negroni"
 	"github.com/gorilla/websocket"
 	"html/template"
-	"io"
+	// "io"
 	"io/ioutil"
 	"net/http"
 	"os"
+	"time"
 )
 
-// type Page struct {
-// 	Title string
-// 	Body  []byte
-// }
-
-// func main() {
-// 	fmt.Println("sito")
-// 	http.HandleFunc("/", indexHandler)
-// 	err := http.ListenAndServe(":"+os.Getenv("PORT"), nil)
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// }
+const (
+	writeWait      = 10 * time.Second
+	pongWait       = 60 * time.Second
+	pingPeriod     = (pongWait * 9) / 10
+	maxMessageSize = 1024 * 1024
+)
 
 type Page struct {
 	Title string
 	Body  []byte
 }
 
-func (p *Page) save() error {
-	filename := p.Title + ".txt"
-	return ioutil.WriteFile(filename, p.Body, 0600)
-}
-
 func publicHandler(w http.ResponseWriter, r *http.Request) {
 	filePath := r.URL.Path[len("/public/"):]
-	body, err := ioutil.ReadFile("sitoapp/public/" + filePath)
+	body, err := ioutil.ReadFile("public/" + filePath)
 	if err == nil {
 		fmt.Fprintf(w, string(body))
 	}
 }
 
 // connection is an middleman between the websocket connection and the hub.
-type connection struct {
+type client struct {
 	// The websocket connection.
 	ws *websocket.Conn
-
 	// Buffered channel of outbound messages.
 	send chan []byte
 }
@@ -56,6 +45,66 @@ type connection struct {
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
+}
+
+// message sent to us by the javascript client
+type message struct {
+	Player string `json:"player"`
+	X      int    `json:"x"`
+	Y      int    `json:"y"`
+}
+
+func closeConnection(c *client) {
+	log.Info("CLOSE CONNECTION")
+	c.ws.WriteMessage(websocket.CloseMessage, []byte{})
+	h.unregister <- c
+}
+
+func handleMessage(c *client) {
+	for {
+		var msg message
+		err := c.ws.ReadJSON(&msg)
+		if err != nil {
+			log.Error(err)
+			closeConnection(c)
+			return
+		} else {
+			log.Info("read msg", msg)
+			if msg.Player != "" {
+				log.Info("read json", msg, err, msg.Player)
+				// _, _ := json.Marshal(msg)
+				h.broadcast <- "player" + msg.Player
+				// c.ws.WriteJSON(msg)
+			}
+		}
+		// mt, data, err := ws.ReadMessage()
+
+		// ctx := log.Fields{"mt": mt, "data": data, "err": err}
+		// if err != nil {
+		// 	if err == io.EOF {
+		// 		log.WithFields(ctx).Info("Websocket closed!")
+		// 	} else {
+		// 		log.Info(err)
+		// 		log.WithFields(ctx).Error("Error reading websocket message")
+		// 	}
+		// 	break
+		// }
+		// switch mt {
+		// case websocket.TextMessage:
+
+		// 	err := json.Unmarshal(data, &msg)
+		// 	if err != nil {
+		// 		ctx["msg"] = msg
+		// 		ctx["err"] = err
+		// 		log.WithFields(ctx).Error("Invalid Message")
+		// 		break
+		// 	}
+		// 	log.Info(msg, msg.Text, msg, msg.X, msg.Y)
+		// default:
+		// 	log.WithFields(ctx).Warning("Unknown Message!")
+		// }
+	}
+	closeConnection(c)
 }
 
 func handleWebsocket(w http.ResponseWriter, r *http.Request) {
@@ -71,49 +120,34 @@ func handleWebsocket(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// id := rr.register(ws)
+	log.Info("NEW CONNECTION")
 
-	for {
-		mt, data, err := ws.ReadMessage()
-		ctx := log.Fields{"mt": mt, "data": data, "err": err}
-		if err != nil {
-			if err == io.EOF {
-				log.WithFields(ctx).Info("Websocket closed!")
-			} else {
-				log.WithFields(ctx).Error("Error reading websocket message")
-			}
-			break
-		}
-		switch mt {
-		case websocket.TextMessage:
-			msg, err := validateMessage(data)
-			if err != nil {
-				ctx["msg"] = msg
-				ctx["err"] = err
-				log.WithFields(ctx).Error("Invalid Message")
-				break
-			}
-			rw.publish(data)
-		default:
-			log.WithFields(ctx).Warning("Unknown Message!")
-		}
+	c := &client{
+		send: make(chan []byte, maxMessageSize),
+		ws:   ws,
 	}
 
-	// rr.deRegister(id)
+	h.register <- c
+	// select {
+	// case h.register <- c:
+	// 	fmt.Println("sent message")
+	// default:
+	// 	fmt.Println("no message sent")
+	// }
 
-	ws.WriteMessage(websocket.CloseMessage, []byte{})
+	go handleMessage(c)
+
 }
 
 func viewHandler(w http.ResponseWriter, r *http.Request) {
-	// title := r.URL.Path[len("/view/"):]
 	p := &Page{Title: "sito"}
-	t, _ := template.ParseFiles("sitoapp/templates/index.html")
+	t, _ := template.ParseFiles("templates/index.html")
 	t.Execute(w, p)
 }
 
 func main() {
 	fmt.Println("sito")
-	// http.Handle("/public/", http.FileServer(http.Dir("./siteoapp/public")))
+	go h.run()
 
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -122,6 +156,7 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/ws", handleWebsocket)
+	// http.Handle("/public", http.FileServer(http.Dir("/public")))
 	mux.HandleFunc("/public/", publicHandler)
 	mux.HandleFunc("/", viewHandler)
 

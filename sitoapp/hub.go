@@ -18,7 +18,10 @@ type hub struct {
 	// Unregister requests
 	unregister chan *client
 
+	messages map[string]message
+
 	content string
+	id      int
 }
 
 var h = hub{
@@ -26,7 +29,9 @@ var h = hub{
 	register:   make(chan *client),
 	unregister: make(chan *client),
 	clients:    make(map[*client]bool),
+	messages:   make(map[string]message),
 	content:    "",
+	id:         0,
 }
 
 func (h *hub) run() {
@@ -60,7 +65,7 @@ func (h *hub) run() {
 }
 
 func (h *hub) broadcastMessage() {
-	log.Info("broadcast message", h.clients)
+	// log.Info("broadcast message", h.clients)
 	for c := range h.clients {
 		c.ws.WriteJSON(h.content)
 		select {

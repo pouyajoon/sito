@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  /*global WebSocket*/
+  /*global WebSocket, angular*/
 
   var ws = new WebSocket('ws://' + window.location.host + '/ws');
 
@@ -18,28 +18,32 @@
       'y': e.pageY
     };
     ds = JSON.stringify(d);
-    console.log('send d', ds);
+    // console.log('send d', ds);
     ws.send(ds);
   }
 
 
   ws.onopen = function() {
-
     console.log('ws open');
     document.getElementById('player').value = 'Guest ' + Math.random();
     sendMousePosition();
-
-    // window.onmousemove = sendMousePosition;
+    window.onmousemove = sendMousePosition;
   };
 
   ws.onclose = function(e) {
     console.log('ws close', e.data);
   };
 
-  ws.onmessage = function(e) {
-    console.log('ws message', JSON.parse(e.data));
-    return e;
-  };
+  var app = angular.module('app', []);
+
+  app.controller('playerController', function($scope) {
+    $scope.title = 'sito';
+    ws.onmessage = function(e) {
+      $scope.m = JSON.parse(e.data);
+      console.log('ws message', $scope.m);
+      return e;
+    };
+  });
 
 
 

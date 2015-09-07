@@ -1,16 +1,17 @@
 package main
 
 import (
-	// "encoding/json"
+	"encoding/json"
 	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"github.com/codegangsta/negroni"
 	"github.com/gorilla/websocket"
-	"html/template"
+	// "html/template"
 	// "io"
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 )
 
@@ -20,6 +21,9 @@ const (
 	pingPeriod     = (pongWait * 9) / 10
 	maxMessageSize = 1024 * 1024
 )
+
+// var int id
+// id = 0
 
 type Page struct {
 	Title string
@@ -40,6 +44,7 @@ type client struct {
 	ws *websocket.Conn
 	// Buffered channel of outbound messages.
 	send chan []byte
+	id   int
 }
 
 var upgrader = websocket.Upgrader{
@@ -55,9 +60,10 @@ type message struct {
 }
 
 func closeConnection(c *client) {
-	log.Info("CLOSE CONNECTION")
+	log.Info("CLOSE CONNECTION", c.id)
 	c.ws.WriteMessage(websocket.CloseMessage, []byte{})
 	h.unregister <- c
+	delete(h.messages, strconv.Itoa(c.id))
 }
 
 func handleMessage(c *client) {
@@ -72,8 +78,9 @@ func handleMessage(c *client) {
 			log.Info("read msg", msg)
 			if msg.Player != "" {
 				log.Info("read json", msg, err, msg.Player)
+				h.messages[strconv.Itoa(c.id)] = msg
 				// _, _ := json.Marshal(msg)
-				h.broadcast <- "player" + msg.Player
+				// h.broadcast <- "player" + msg.Player
 				// c.ws.WriteJSON(msg)
 			}
 		}
@@ -125,8 +132,9 @@ func handleWebsocket(w http.ResponseWriter, r *http.Request) {
 	c := &client{
 		send: make(chan []byte, maxMessageSize),
 		ws:   ws,
+		id:   h.id,
 	}
-
+	h.id += 1
 	h.register <- c
 	// select {
 	// case h.register <- c:
@@ -140,14 +148,33 @@ func handleWebsocket(w http.ResponseWriter, r *http.Request) {
 }
 
 func viewHandler(w http.ResponseWriter, r *http.Request) {
-	p := &Page{Title: "sito"}
-	t, _ := template.ParseFiles("templates/index.html")
-	t.Execute(w, p)
+	body, err := ioutil.ReadFile("templates/index.html")
+
+	log.Info(body, err)
+	fmt.Fprintf(w, string(body))
+	// p := &Page{Title: "sito"}
+	// t, err := template.ParseFiles("templates/index.html")
+	// if err != nil {
+	// 	log.Error(err)
+	// }
+	// t.Execute(w, p)
+}
+
+func interval() {
+	ticker := time.NewTicker(time.Millisecond * 50)
+	go func() {
+		for range ticker.C {
+			// log.Info("Tick at", t)
+			s, _ := json.Marshal(h.messages)
+			h.broadcast <- string(s)
+		}
+	}()
 }
 
 func main() {
 	fmt.Println("sito")
 	go h.run()
+	go interval()
 
 	port := os.Getenv("PORT")
 	if port == "" {

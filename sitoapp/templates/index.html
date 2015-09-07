@@ -1,13 +1,16 @@
 <!DOCTYPE html>
-<html>
-  <head>
+<html ng-app="app">
+  <head>    
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css">
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.4.5/angular.min.js"></script>
     <script type="text/javascript" src="public/js/main.js"></script>
-    <title>{{.Title}}</title>
+    <title>{{title}}</title>
   </head>
-  <body ng-app>
-    <h1>{{.Title}}</h1>
+  <body ng-controller="playerController">
+    <h1>{{title}}</h1>
     <input type="text" id="player" placeholder="player name"/>
+    <div>
+      <div ng-repeat="(k, v) in m">{{k}} >> {{v}}</div>    
+    </div>    
   </body>
 </html>

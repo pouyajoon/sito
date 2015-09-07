@@ -2,14 +2,9 @@
 	"ImportPath": "sito",
 	"GoVersion": "go1.4.2",
 	"Packages": [
-		"github.com/gorilla/websocket"
+		"github.com/gorilla/websocket",
+    "github.com/codegangsta/negroni",
+    "github.com/Sirupsen/logrus"
 	],
-	"Deps": [{
-		"ImportPath": "github.com/gorilla/websocket",
-		"Rev": "b6ab76f1fe9803ee1d59e7e5b2a797c1fe897ce5"
-	}, {
-		"ImportPath": "github.com/Sirupsen/logrus",
-	}, {
-		"ImportPath": "github.com/codegangsta/negroni",
-	}]
+	"Deps": []
 }

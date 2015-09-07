@@ -2,18 +2,14 @@
 	"ImportPath": "sito",
 	"GoVersion": "go1.4.2",
 	"Packages": [
-		"./..."
+		"github.com/gorilla/websocket"
 	],
-	"Deps": [
-		{
-			"ImportPath": "github.com/Sirupsen/logrus",
-			"Comment": "v0.8.6-15-gb17e718",
-			"Rev": "b17e7183259cc73db8b8fb9e534bfc153f53cb12"
-		},
-		{
-			"ImportPath": "github.com/codegangsta/negroni",
-			"Comment": "v0.1-70-gc7477ad",
-			"Rev": "c7477ad8e330bef55bf1ebe300cf8aa67c492d1b"
-		}
-	]
+	"Deps": [{
+		"ImportPath": "github.com/gorilla/websocket",
+		"Rev": "b6ab76f1fe9803ee1d59e7e5b2a797c1fe897ce5"
+	}, {
+		"ImportPath": "github.com/Sirupsen/logrus",
+	}, {
+		"ImportPath": "github.com/codegangsta/negroni",
+	}]
 }

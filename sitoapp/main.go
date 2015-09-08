@@ -32,7 +32,7 @@ type Page struct {
 
 func publicHandler(w http.ResponseWriter, r *http.Request) {
 	filePath := r.URL.Path[len("/public/"):]
-	body, err := ioutil.ReadFile("public/" + filePath)
+	body, err := ioutil.ReadFile("sitoapp/public/" + filePath)
 	if err == nil {
 		fmt.Fprintf(w, string(body))
 	}
@@ -148,7 +148,7 @@ func handleWebsocket(w http.ResponseWriter, r *http.Request) {
 }
 
 func viewHandler(w http.ResponseWriter, r *http.Request) {
-	body, err := ioutil.ReadFile("templates/index.html")
+	body, err := ioutil.ReadFile("sitoapp/templates/index.html")
 
 	log.Info(body, err)
 	fmt.Fprintf(w, string(body))

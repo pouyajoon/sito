@@ -1,0 +1,9 @@
+.boule{
+  position:absolute;
+/*  transition: left 0.25s ease;
+  transition: top 0.25s ease;*/
+  background-color: rgba(0, 255, 0, 0.15);
+  padding:5px;
+  border: 1px solid rgba(0, 255, 0, 0.5);
+  border-radius: 10px;
+}

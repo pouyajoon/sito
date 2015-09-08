@@ -2,7 +2,8 @@
   'use strict';
   /*global WebSocket, angular*/
 
-  var ws = new WebSocket('ws://' + window.location.host + '/ws');
+  var app, ws;
+  ws = new WebSocket('ws://' + window.location.host + '/ws');
 
   function sendMousePosition(e) {
     if (e === undefined) {
@@ -25,7 +26,7 @@
 
   ws.onopen = function() {
     console.log('ws open');
-    document.getElementById('player').value = 'Guest ' + Math.random();
+    document.getElementById('player').value = 'Guest ' + Math.floor(Math.random() * 1e3);
     sendMousePosition();
     window.onmousemove = sendMousePosition;
   };
@@ -34,13 +35,23 @@
     console.log('ws close', e.data);
   };
 
-  var app = angular.module('app', []);
+  app = angular.module('app', []);
+
+  function bin2String(array) {
+    var result = '',
+      i;
+    for (i = 0; i < array.length; i += 1) {
+      result += String.fromCharCode(parseInt(array[i], 2));
+    }
+    return result;
+  }
 
   app.controller('playerController', function($scope) {
     $scope.title = 'sito';
     ws.onmessage = function(e) {
       $scope.m = JSON.parse(e.data);
-      console.log('ws message', $scope.m);
+      // console.log('ws message', $scope.m);
+      $scope.$apply();
       return e;
     };
   });

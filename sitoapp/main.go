@@ -20,6 +20,8 @@ const (
 	pongWait       = 60 * time.Second
 	pingPeriod     = (pongWait * 9) / 10
 	maxMessageSize = 1024 * 1024
+	// rootPath       = "sitoapp/"
+	rootPath = ""
 )
 
 // var int id
@@ -32,7 +34,7 @@ type Page struct {
 
 func publicHandler(w http.ResponseWriter, r *http.Request) {
 	filePath := r.URL.Path[len("/public/"):]
-	body, err := ioutil.ReadFile("sitoapp/public/" + filePath)
+	body, err := ioutil.ReadFile(rootPath + "public/" + filePath)
 	if err == nil {
 		fmt.Fprintf(w, string(body))
 	}
@@ -75,41 +77,10 @@ func handleMessage(c *client) {
 			closeConnection(c)
 			return
 		} else {
-			log.Info("read msg", msg)
 			if msg.Player != "" {
-				log.Info("read json", msg, err, msg.Player)
 				h.messages[strconv.Itoa(c.id)] = msg
-				// _, _ := json.Marshal(msg)
-				// h.broadcast <- "player" + msg.Player
-				// c.ws.WriteJSON(msg)
 			}
 		}
-		// mt, data, err := ws.ReadMessage()
-
-		// ctx := log.Fields{"mt": mt, "data": data, "err": err}
-		// if err != nil {
-		// 	if err == io.EOF {
-		// 		log.WithFields(ctx).Info("Websocket closed!")
-		// 	} else {
-		// 		log.Info(err)
-		// 		log.WithFields(ctx).Error("Error reading websocket message")
-		// 	}
-		// 	break
-		// }
-		// switch mt {
-		// case websocket.TextMessage:
-
-		// 	err := json.Unmarshal(data, &msg)
-		// 	if err != nil {
-		// 		ctx["msg"] = msg
-		// 		ctx["err"] = err
-		// 		log.WithFields(ctx).Error("Invalid Message")
-		// 		break
-		// 	}
-		// 	log.Info(msg, msg.Text, msg, msg.X, msg.Y)
-		// default:
-		// 	log.WithFields(ctx).Warning("Unknown Message!")
-		// }
 	}
 	closeConnection(c)
 }
@@ -148,9 +119,7 @@ func handleWebsocket(w http.ResponseWriter, r *http.Request) {
 }
 
 func viewHandler(w http.ResponseWriter, r *http.Request) {
-	body, err := ioutil.ReadFile("sitoapp/templates/index.html")
-
-	log.Info(body, err)
+	body, _ := ioutil.ReadFile(rootPath + "templates/index.html")
 	fmt.Fprintf(w, string(body))
 	// p := &Page{Title: "sito"}
 	// t, err := template.ParseFiles("templates/index.html")
@@ -164,9 +133,8 @@ func interval() {
 	ticker := time.NewTicker(time.Millisecond * 50)
 	go func() {
 		for range ticker.C {
-			// log.Info("Tick at", t)
 			s, _ := json.Marshal(h.messages)
-			h.broadcast <- string(s)
+			h.broadcast <- s
 		}
 	}()
 }

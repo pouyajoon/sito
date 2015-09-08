@@ -1,8 +1,8 @@
 package main
 
 import (
-// "encoding/json" V
-// log "sito/Godeps/_workspace/src/github.com/Sirupsen/logrus"
+	// "encoding/json" V
+	log "sito/Godeps/_workspace/src/github.com/Sirupsen/logrus"
 )
 
 type hub struct {
@@ -29,13 +29,18 @@ var h = hub{
 }
 
 func (h *hub) run() {
+	log.Info("hub run")
 	for {
+		// log.Info("hub for")
+		// h.broadcast <- string("salut")
 		select {
 		case c := <-h.register:
+			log.Info("register")
 			h.clients[c] = true
 			c.send <- []byte(h.content)
 			break
 		case c := <-h.unregister:
+			log.Info("unregister")
 			_, ok := h.clients[c]
 			if ok {
 				delete(h.clients, c)

@@ -90,14 +90,12 @@ func handleWebsocket(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Method not allowed", 405)
 		return
 	}
-
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.WithField("err", err).Println("Upgrading to websockets")
 		http.Error(w, "Error Upgrading to websockets", 400)
 		return
 	}
-
 	log.Info("NEW CONNECTION")
 
 	c := &client{
@@ -107,13 +105,6 @@ func handleWebsocket(w http.ResponseWriter, r *http.Request) {
 	}
 	h.id += 1
 	h.register <- c
-	// select {
-	// case h.register <- c:
-	// 	fmt.Println("sent message")
-	// default:
-	// 	fmt.Println("no message sent")
-	// }
-
 	go handleMessage(c)
 
 }
@@ -151,9 +142,8 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/ws", handleWebsocket)
-	// http.Handle("/public", http.FileServer(http.Dir("/public")))
-	mux.HandleFunc("/public/", publicHandler)
 	mux.HandleFunc("/", viewHandler)
+	// mux.Handle("/", http.FileServer(http.Dir(rootPath+"public")))
 
 	n := negroni.Classic()
 	n.UseHandler(mux)

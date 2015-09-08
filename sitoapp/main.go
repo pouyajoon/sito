@@ -8,7 +8,7 @@ import (
 	"sito/Godeps/_workspace/src/github.com/gorilla/websocket"
 	// "html/template"
 	// "io"
-	"io/ioutil"
+	// "io/ioutil"
 	"net/http"
 	"os"
 	"strconv"
@@ -32,13 +32,13 @@ type Page struct {
 	Body  []byte
 }
 
-func publicHandler(w http.ResponseWriter, r *http.Request) {
-	filePath := r.URL.Path[len("/public/"):]
-	body, err := ioutil.ReadFile(rootPath + "public/" + filePath)
-	if err == nil {
-		fmt.Fprintf(w, string(body))
-	}
-}
+// func publicHandler(w http.ResponseWriter, r *http.Request) {
+// 	filePath := r.URL.Path[len("/public/"):]
+// 	body, err := ioutil.ReadFile(rootPath + "public/" + filePath)
+// 	if err == nil {
+// 		fmt.Fprintf(w, string(body))
+// 	}
+// }
 
 // connection is an middleman between the websocket connection and the hub.
 type client struct {
@@ -109,16 +109,16 @@ func handleWebsocket(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func viewHandler(w http.ResponseWriter, r *http.Request) {
-	body, _ := ioutil.ReadFile(rootPath + "templates/index.html")
-	fmt.Fprintf(w, string(body))
-	// p := &Page{Title: "sito"}
-	// t, err := template.ParseFiles("templates/index.html")
-	// if err != nil {
-	// 	log.Error(err)
-	// }
-	// t.Execute(w, p)
-}
+// func viewHandler(w http.ResponseWriter, r *http.Request) {
+// 	body, _ := ioutil.ReadFile(rootPath + "templates/index.html")
+// 	fmt.Fprintf(w, string(body))
+// p := &Page{Title: "sito"}
+// t, err := template.ParseFiles("templates/index.html")
+// if err != nil {
+// 	log.Error(err)
+// }
+// t.Execute(w, p)
+// }
 
 func interval() {
 	ticker := time.NewTicker(time.Millisecond * 50)
@@ -142,8 +142,7 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/ws", handleWebsocket)
-	mux.HandleFunc("/", viewHandler)
-	// mux.Handle("/", http.FileServer(http.Dir(rootPath+"public")))
+	mux.Handle("/", http.FileServer(http.Dir(rootPath+"public")))
 
 	n := negroni.Classic()
 	n.UseHandler(mux)

@@ -3,9 +3,9 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	log "sito/sitoapp/Godeps/_workspace/src/github.com/Sirupsen/logrus"
-	"sito/sitoapp/Godeps/_workspace/src/github.com/codegangsta/negroni"
-	"sito/sitoapp/Godeps/_workspace/src/github.com/gorilla/websocket"
+	log "sito/Godeps/_workspace/src/github.com/Sirupsen/logrus"
+	"sito/Godeps/_workspace/src/github.com/codegangsta/negroni"
+	"sito/Godeps/_workspace/src/github.com/gorilla/websocket"
 	// "html/template"
 	// "io"
 	"io/ioutil"

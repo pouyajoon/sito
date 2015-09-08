@@ -2,7 +2,7 @@ package main
 
 import (
 	// "encoding/json" V
-	log "sito/sitoapp/Godeps/_workspace/src/github.com/Sirupsen/logrus"
+	log "sito/Godeps/_workspace/src/github.com/Sirupsen/logrus"
 )
 
 type hub struct {

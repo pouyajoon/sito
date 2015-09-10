@@ -3,13 +3,25 @@
   <head>    
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css">
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.4.5/angular.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/snap.svg/0.4.1/snap.svg-min.js"></script>
+    <script type="text/javascript" src="/js/pbZone.js"></script>
     <script type="text/javascript" src="/js/main.js"></script>
     <link rel="stylesheet" type="text/css" href="/css/main.css"/>
     <title>{{title}}</title>
   </head>
   <body ng-controller="playerController">
-    <h1>{{title}}</h1>
-    <input type="text" id="player" placeholder="player name"/>
+    <!-- <h1>{{title}}</h1> -->
+    <svg id="svg">
+      <desc>Created with Snap</desc>
+      <defs></defs>
+      <!-- <rect class="me" x="{{v.x - v.s/2}}" y="{{v.y - v.s/2}}" width="{{v.s}}" height="{{v.s}}" ng-repeat="(k, v) in m"></rect> -->
+      <g ng-repeat="(k, v) in m" >
+        <rect ng-show="v.player !== myname" class="svgboule" x="{{v.x - v.s/2}}" y="{{v.y - v.s/2}}" width="{{v.s}}" height="{{v.s}}"></rect>
+        <rect ng-show="v.player === myname" class="svgboule-me" x="50%" y="50%" width="{{v.s}}" height="{{v.s}}"></rect>
+      </g>
+          
+    </svg>
+    <input type="text" id="player" ng-model="myname" placeholder="player name"/>
     <div>
       <div class="boule" style="left:{{v.x + 10}}px;top:{{v.y}}px" ng-repeat="(k, v) in m">{{v.player}}</div>    
     </div>    

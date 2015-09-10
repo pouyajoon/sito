@@ -1,56 +1,53 @@
 (function() {
   'use strict';
-  /*global WebSocket, angular*/
+  /*global WebSocket, angular, PbZone*/
 
   var app, ws;
-  ws = new WebSocket('ws://' + window.location.host + '/ws');
 
   function sendMousePosition(e) {
     if (e === undefined) {
       e = {
-        pageX: -1,
-        pageY: -1
+        pageX: 0,
+        pageY: 0
       };
     }
     var d, ds, p = document.getElementById('player');
     d = {
       'player': p !== null ? p.value : 'P.',
       'x': e.pageX,
-      'y': e.pageY
+      'y': e.pageY,
+      's': 20
     };
     ds = JSON.stringify(d);
-    // console.log('send d', ds);
     ws.send(ds);
   }
 
 
-  ws.onopen = function() {
-    console.log('ws open');
-    document.getElementById('player').value = 'Guest ' + Math.floor(Math.random() * 1e3);
-    sendMousePosition();
-    window.onmousemove = sendMousePosition;
-  };
-
-  ws.onclose = function(e) {
-    console.log('ws close', e.data);
-  };
-
   app = angular.module('app', []);
-
-  function bin2String(array) {
-    var result = '',
-      i;
-    for (i = 0; i < array.length; i += 1) {
-      result += String.fromCharCode(parseInt(array[i], 2));
-    }
-    return result;
-  }
-
   app.controller('playerController', function($scope) {
+
+    ws = new WebSocket('ws://' + window.location.host + '/ws');
+
+    ws.onopen = function() {
+      console.log('ws open');
+      $scope.myname = 'Guest ' + Math.floor(Math.random() * 1e3);
+      sendMousePosition();
+      window.onmousemove = sendMousePosition;
+    };
+
+    ws.onclose = function(e) {
+      console.log('ws close', e.data);
+    };
+
+    // var z = new PbZone();
     $scope.title = 'sito';
+    $scope.m = [];
     ws.onmessage = function(e) {
       $scope.m = JSON.parse(e.data);
-      // console.log('ws message', $scope.m);
+      // console.log($scope.m);
+      // z.c.animate({
+      //   cx: $scope.m.x
+      // }, 200);
       $scope.$apply();
       return e;
     };

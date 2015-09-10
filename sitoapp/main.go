@@ -20,8 +20,8 @@ const (
 	pongWait       = 60 * time.Second
 	pingPeriod     = (pongWait * 9) / 10
 	maxMessageSize = 1024 * 1024
-	rootPath       = "sitoapp/"
-	// rootPath = ""
+	// rootPath       = "sitoapp/"
+	rootPath = ""
 )
 
 // var int id
@@ -59,6 +59,7 @@ type message struct {
 	Player string `json:"player"`
 	X      int    `json:"x"`
 	Y      int    `json:"y"`
+	S      int    `json:"s"`
 }
 
 func closeConnection(c *client) {
